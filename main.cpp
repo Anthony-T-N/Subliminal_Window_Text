@@ -12,9 +12,13 @@
 // Forward declarations: (Note: Allows for functions to be mentioned in advance of the main function.
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
+std::string test_string = "123456789";
+
 // Entry point
 int main(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/, int nCmdShow) 
 {
+    test_string = "Stage 1";
+
     const wchar_t k_WndClassName[] = L"OverlayWindowClass";
 
     // Register window class
@@ -28,6 +32,8 @@ int main(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/,
     wcex.lpszClassName = k_WndClassName;
     ::RegisterClassExW(&wcex);
 
+    test_string = "Stage 2";
+
     HWND hWnd = ::CreateWindowExW(WS_EX_TOPMOST | WS_EX_LAYERED,
                                     k_WndClassName,
                                     L"Overlay Window",
@@ -40,19 +46,29 @@ int main(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/,
     // Semi-transparent window. Mask out background color
     ::SetLayeredWindowAttributes(hWnd, RGB(0, 0, 0), 128, LWA_ALPHA | LWA_COLORKEY);
 
-
     ::ShowWindow(hWnd, nCmdShow);
     ::UpdateWindow(hWnd);
+
+    test_string = "Stage 3";
 
     // Main message loop:
     MSG msg = { 0 };
     while (::GetMessageW(&msg, NULL, 0, 0) > 0)
     {
-        std::cout << "HELLO Friend" << "\n";
         ::TranslateMessage(&msg);
         ::DispatchMessageW(&msg);
+        test_string = "Stage 4";
     }
     return (int)msg.wParam;
+}
+
+// https://stackoverflow.com/questions/1200188/how-to-convert-stdstring-to-lpcstr
+LPWSTR string_to_LPWSTR(const std::string& s)
+{
+    LPWSTR ws = new wchar_t[s.size() + 1];
+    copy(s.begin(), s.end(), ws);
+    ws[s.size()] = 0;
+    return ws;
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -65,9 +81,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             HDC hDC = ::BeginPaint(hWnd, &ps);
             RECT rc = { 0 };
             ::GetClientRect(hWnd, &rc);
-            ::SetTextColor(hDC, RGB(255, 255, 255));
+            ::SetTextColor(hDC, RGB(255, 64, 64));
             ::SetBkMode(hDC, TRANSPARENT);
-            ::DrawTextExW(hDC, L"Over Here!", -1, &rc,
+            ::DrawTextExW(hDC, string_to_LPWSTR(test_string), -1, &rc,
                 DT_SINGLELINE | DT_CENTER | DT_VCENTER, NULL);
             ::EndPaint(hWnd, &ps);
         }
