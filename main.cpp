@@ -17,7 +17,9 @@ std::string test_string = "123456789";
 // Entry point
 int main(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/, int nCmdShow) 
 {
+  
     test_string = "Stage 1";
+    std::cout << test_string << "\n";
 
     const wchar_t k_WndClassName[] = L"OverlayWindowClass";
 
@@ -33,6 +35,7 @@ int main(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/,
     ::RegisterClassExW(&wcex);
 
     test_string = "Stage 2";
+    std::cout << test_string << "\n";
 
     HWND hWnd = ::CreateWindowExW(WS_EX_TOPMOST | WS_EX_LAYERED,
                                     k_WndClassName,
@@ -50,6 +53,32 @@ int main(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/,
     ::UpdateWindow(hWnd);
 
     test_string = "Stage 3";
+    std::cout << test_string << "\n";
+    wcex = { 0 };
+    wcex.cbSize = sizeof(wcex);
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = WndProc;
+    wcex.hInstance = hInstance;
+    wcex.hCursor = ::LoadCursorW(NULL, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)::GetStockObject(BLACK_BRUSH);
+    wcex.lpszClassName = k_WndClassName;
+    ::RegisterClassExW(&wcex);
+
+    test_string = "Stage 4";
+    std::cout << test_string << "\n";
+
+    hWnd = ::CreateWindowExW(WS_EX_TOPMOST | WS_EX_LAYERED,
+        k_WndClassName,
+        L"Overlay Window",
+        WS_POPUP | WS_VISIBLE,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        800, 600,
+        NULL, NULL,
+        hInstance,
+        NULL);
+
+    ::ShowWindow(hWnd, nCmdShow);
+    ::UpdateWindow(hWnd);
 
     // Main message loop:
     MSG msg = { 0 };
@@ -57,7 +86,8 @@ int main(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR /*lpCmdLine*/,
     {
         ::TranslateMessage(&msg);
         ::DispatchMessageW(&msg);
-        test_string = "Stage 4";
+        test_string = "Stage 5";
+        std::cout << test_string << "\n";
     }
     return (int)msg.wParam;
 }
